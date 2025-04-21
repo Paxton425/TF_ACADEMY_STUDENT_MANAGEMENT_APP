@@ -1,0 +1,23 @@
+﻿@{
+    ViewData["Title"] = "SignIn";
+}
+
+<h1>SignIn</h1>
+
+<button class="btn btn-primary" onclick="redirectToGoogleSignIn('@ViewBag.GoogleLoginUrl')">Sign in with Google</button>
+
+<script>
+    function redirectToGoogleSignIn(url) {
+        // Construct the return URL dynamically (redirect to /home/dashboard after login)
+        const currentUrl = window.location.href;
+        const urlObject = new URL(currentUrl);
+        const domainName = urlObject.origin;
+        const returnUrl = domainName + '/Auth/AuthVerification';
+
+        // Construct the Google Sign-In URL with the returnUrl parameter
+        const googleSignInUrl = url + '?returnUrl=' + encodeURIComponent(returnUrl);
+
+        // Redirect the user's browser to the Google sign-in endpoint
+        window.location.href = googleSignInUrl;
+    }   
+</script>

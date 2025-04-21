@@ -1,0 +1,65 @@
+﻿@model Program
+
+@{
+    ViewData["Title"] = "AuthVerification";
+}
+
+<h1>AuthVerification</h1>
+
+<div>
+    <h4>Status</h4>
+    <hr />
+    <div>
+        <p id="login_status"></p>
+    </div>
+    
+    <p id="message"></p>
+    </dl>
+</div>
+<div>
+    <a id="login_direction" class="visually-hidden" asp-controller="Auth" asp-action="SignIn">Back to Login</a>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js" integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/js/bootstrap.min.js" integrity="sha384-VQqxDN0EQCkWoxt/0vsQvZswzTHUVOImccYmSyhJTp7kGtPed0Qcx8rK9h9YEgx+" crossorigin="anonymous"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+<script>
+    function checkAuthStatus() {
+        const apiDomain = '@ViewBag.ApiUrl';
+        $.ajax({
+            url: apiDomain+'/api/auth/checkauth', //  Your API endpoint
+            type: 'GET',
+            xhrFields: {
+                withCredentials: true //  Important for sending cookies
+            },
+            success: function(response) {
+                if (response.isAuthenticated) {
+                    console.log('User is authenticated.  Welcome, ' + response.userName);
+                    //  Update UI to show logged-in state
+                    $('#login_status').html('Logged In <i class="bi bi-check2-all"></i>');
+                    $('#message').text('Welcome, ' + response.userName);
+                    setTimeout(function() {
+                         let newRoute = new URL(window.location).origin+"/home/Dashboard";
+                         console.log(newRoute)
+                          //window.location.replace(newRoute)
+                    }, 2000);
+
+                } else {
+                    console.log('User is not authenticated.');
+                    //  Update UI to show logged-out state
+                    $('#login_status').text('Logged Out');
+                    $('#login_direction').show();
+                }
+            },
+            error: function(jqXHR, textStatus, errorThrown) {
+                console.error('Error checking auth status:', textStatus, errorThrown);
+                //  Handle error (e.g., show a message, redirect to login)
+                $('#login_status').text('Authentication Error');
+                $('#login_direction').show();
+            }
+        });
+    }
+
+    $(document).ready(function() {
+        checkAuthStatus(); 
+    });
+</script>

@@ -1,0 +1,57 @@
+﻿
+@{
+    ViewData["Title"] = "SignOut";
+}
+
+<h1>Signing Out...</h1>
+<div class="spinner-border bg-primary"> </div>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+<script>
+    $(document).ready(function() {
+        function SignOut() {
+            // 1. Get the Anti-CSRF Token
+            $.ajax({
+                url: '@ViewBag.GoogleLogOutConfirmationUrl', //  API endpoint to get the token
+                type: 'GET',
+                success: function(data) {
+                    const csrfToken = data.token;
+                    const csrfTokenName = data.tokenName; // Get the token field name
+                    console.log("CSRF Token Name:", csrfTokenName);
+                    console.log("CSRF Token Value:", csrfToken);
+
+                    // 2. Send the Logout Request (POST) with the Token
+                    $.ajax({
+                        url: '@ViewBag.GoogleLogOutUrl', //  API endpoint to log out
+                        type: 'POST',
+                        headers: {
+                            'X-CSRF-TOKEN': csrfToken //  Include the token as a header, use the custom header name
+                        },
+                        data: {  //  Or,  send it as form data.  Important for POST!
+                            [csrfTokenName]: csrfToken // Use brackets to use the variable as the key
+                        },
+                        xhrFields: {
+                            withCredentials: true
+                        },
+                        success: function(response) {
+                            console.log(response.message);
+
+                            let newRoute = URL(window.location).hostname+"/Auth/Signin";
+                            window.location.replace(newRoute)
+                        },
+                        error: function(jqXHR, textStatus, errorThrown) {
+                            console.error('Logout error:', textStatus, errorThrown);
+                            alert('Logout failed. Please try again.');
+                        }
+                    });
+                },
+                error: function(jqXHR, textStatus, errorThrown) {
+                    console.error("Failed to get CSRF token:", textStatus, errorThrown);
+                    alert('Failed to get CSRF token.  Logout cannot proceed.');
+                }
+            });
+        };
+
+        SignOut();
+    });
+</script>
